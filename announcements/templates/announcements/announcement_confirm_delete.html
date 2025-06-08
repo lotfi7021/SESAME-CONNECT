@@ -1,0 +1,411 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #87CEEB 0%, #4682B4 100%);
+        --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        --light-gradient: linear-gradient(135deg, rgba(135, 206, 235, 0.1) 0%, rgba(70, 130, 180, 0.1) 100%);
+        --card-shadow: 0 15px 35px rgba(255, 107, 107, 0.2);
+        --hover-shadow: 0 20px 40px rgba(255, 107, 107, 0.3);
+        --text-primary: #2c3e50;
+        --text-secondary: #5a6c7d;
+    }
+
+    body {
+        background: linear-gradient(135deg, #f8fbff 0%, #e8f4f8 100%);
+        min-height: 100vh;
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    /* Floating background elements */
+    .floating-bg {
+        position: fixed;
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    .floating-bg-1 {
+        top: 10%;
+        left: -5%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255, 107, 107, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float-slow 12s ease-in-out infinite;
+    }
+
+    .floating-bg-2 {
+        bottom: 20%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(135, 206, 235, 0.08) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float-slow 15s ease-in-out infinite reverse;
+    }
+
+    .floating-bg-3 {
+        top: 50%;
+        right: 10%;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(255, 107, 107, 0.05) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float-slow 8s ease-in-out infinite;
+    }
+
+    @keyframes float-slow {
+        0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
+        50% { transform: translateY(-30px) rotate(3deg); opacity: 1; }
+    }
+
+    .delete-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+    }
+
+    .delete-card {
+        border: none;
+        border-radius: 1.5rem;
+        box-shadow: var(--card-shadow);
+        max-width: 550px;
+        width: 100%;
+        margin: 0 auto;
+        backdrop-filter: blur(20px);
+        background: rgba(255, 255, 255, 0.95);
+        overflow: hidden;
+        position: relative;
+        animation: slideInUp 0.6s ease-out;
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .delete-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--danger-gradient);
+    }
+
+    .delete-header {
+        background: var(--danger-gradient);
+        color: white;
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .delete-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="warning-pattern" width="20" height="20" patternUnits="userSpaceOnUse"><polygon points="10,2 18,16 2,16" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23warning-pattern)"/></svg>');
+        opacity: 0.3;
+    }
+
+    .delete-title {
+        font-weight: 700;
+        font-size: 1.5rem;
+        letter-spacing: 0.5px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .delete-icon {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        display: inline-block;
+        animation: pulse-warning 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-warning {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    .delete-body {
+        padding: 3rem 2.5rem;
+        text-align: center;
+        background: var(--light-gradient);
+    }
+
+    .delete-message {
+        margin-bottom: 2rem;
+    }
+
+    .delete-message p:first-child {
+        font-size: 1.15rem;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        font-weight: 500;
+    }
+
+    .announcement-title {
+        font-weight: 700;
+        font-size: 1.3rem;
+        background: var(--danger-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        word-break: break-word;
+        margin: 1.5rem 0;
+        padding: 1rem;
+        background-color: rgba(255, 107, 107, 0.1);
+        border-radius: 0.75rem;
+        border-left: 4px solid #ff6b6b;
+    }
+
+    .warning-text {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        font-weight: 500;
+        margin-top: 1rem;
+        padding: 1rem;
+        background: rgba(255, 193, 7, 0.1);
+        border-radius: 0.5rem;
+        border-left: 3px solid #ffc107;
+    }
+
+    .warning-text i {
+        color: #ffc107;
+        margin-right: 0.5rem;
+    }
+
+    .button-container {
+        margin-top: 2.5rem;
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .confirm-btn {
+        background: var(--danger-gradient);
+        border: none;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        font-size: 1.05rem;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        min-width: 160px;
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    }
+
+    .confirm-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #dc3545 0%, #a71d2a 100%);
+        transition: left 0.3s ease;
+        z-index: -1;
+    }
+
+    .confirm-btn:hover::before {
+        left: 0;
+    }
+
+    .confirm-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+        color: white;
+    }
+
+    .confirm-btn:active {
+        transform: translateY(-1px);
+    }
+
+    .cancel-btn {
+        background: transparent;
+        border: 2px solid;
+        border-image: var(--primary-gradient) 1;
+        color: #4682B4;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        font-size: 1.05rem;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        min-width: 160px;
+    }
+
+    .cancel-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: var(--primary-gradient);
+        transition: left 0.3s ease;
+        z-index: -1;
+    }
+
+    .cancel-btn:hover::before {
+        left: 0;
+    }
+
+    .cancel-btn:hover {
+        color: white;
+        border-color: transparent;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(70, 130, 180, 0.3);
+    }
+
+    .cancel-btn:active {
+        transform: translateY(-1px);
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .delete-body {
+            padding: 2rem 1.5rem;
+        }
+        
+        .delete-header {
+            padding: 1.5rem;
+        }
+        
+        .delete-title {
+            font-size: 1.3rem;
+        }
+        
+        .announcement-title {
+            font-size: 1.1rem;
+        }
+        
+        .button-container {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .confirm-btn, .cancel-btn {
+            width: 100%;
+            max-width: 280px;
+        }
+        
+        .floating-bg-1, .floating-bg-2, .floating-bg-3 {
+            display: none;
+        }
+    }
+
+    /* Loading state for buttons */
+    .btn-loading {
+        pointer-events: none;
+        opacity: 0.7;
+    }
+
+    .btn-loading::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-left: -10px;
+        margin-top: -10px;
+        width: 20px;
+        height: 20px;
+        border: 2px solid transparent;
+        border-top: 2px solid currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+
+<!-- Floating background elements -->
+<div class="floating-bg floating-bg-1"></div>
+<div class="floating-bg floating-bg-2"></div>
+<div class="floating-bg floating-bg-3"></div>
+
+<div class="container delete-container">
+    <div class="card delete-card">
+        <div class="card-header delete-header">
+            <div class="text-center">
+                <div class="delete-icon">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+                <h3 class="delete-title mb-0">Delete Announcement</h3>
+            </div>
+        </div>
+        
+        <div class="card-body delete-body">
+            <div class="delete-message">
+                <p>Are you sure you want to permanently delete this announcement?</p>
+                
+                <div class="announcement-title">
+                    <i class="bi bi-file-text me-2"></i>"{{ announcement.title }}"
+                </div>
+                
+                <div class="warning-text">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    This action cannot be undone and will permanently remove all associated data.
+                </div>
+            </div>
+
+            <form method="POST" id="deleteForm">
+                {% csrf_token %}
+                <div class="button-container">
+                    <a href="{% url 'announcement-detail' announcement.pk %}" 
+                       class="btn cancel-btn"
+                       id="cancelBtn">
+                        <i class="bi bi-arrow-left me-2"></i>Cancel
+                    </a>
+                    <button type="submit" 
+                            class="btn confirm-btn text-white"
+                            id="confirmBtn">
+                        <i class="bi bi-trash-fill me-2"></i>Confirm Delete
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('deleteForm');
+    const confirmBtn = document.getElementById('confirmBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    
+    form.addEventListener('submit', function(e) {
+        // Add loading state
+        confirmBtn.classList.add('btn-loading');
+        confirmBtn.innerHTML = 'Deleting...';
+        cancelBtn.style.pointerEvents = 'none';
+        cancelBtn.style.opacity = '0.5';
+        
+        // Prevent double submission
+        confirmBtn.disabled = true;
+    });
+});
+</script>
+{% endblock %}

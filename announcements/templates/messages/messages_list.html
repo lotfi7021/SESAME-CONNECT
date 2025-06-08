@@ -1,0 +1,583 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<!-- Messages Display -->
+<div class="container">
+  {% if messages %}
+  <div class="row">
+    <div class="col-12">
+      {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show mt-3 enhanced-alert">
+        <i class="bi bi-{% if message.tags == 'success' %}check-circle{% else %}exclamation-triangle{% endif %} me-2"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<style>
+    :root {
+        --blue-light-primary: #4a90e2;
+        --blue-light-secondary: #7bb3f0;
+        --blue-light-accent: #a8d0ff;
+        --blue-light-dark: #2c5aa0;
+        --blue-light-gradient: linear-gradient(135deg, #4a90e2 0%, #7bb3f0 100%);
+        --blue-light-glow: 0 0 20px rgba(74, 144, 226, 0.3);
+        --blue-light-soft-glow: 0 0 10px rgba(74, 144, 226, 0.2);
+    }
+
+    body {
+        background: linear-gradient(135deg, #8ec5df 0%, #65a7c7 100%);
+        min-height: 100vh;
+    }
+
+    /* Enhanced Alert Styling */
+    .enhanced-alert {
+        border-radius: 1rem;
+        border: none;
+        box-shadow: var(--blue-light-soft-glow);
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.95) !important;
+        border-left: 4px solid var(--blue-light-primary);
+        transition: all 0.3s ease;
+    }
+
+    .enhanced-alert:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--blue-light-glow);
+    }
+
+    .enhanced-alert.alert-success {
+        border-left-color: #28a745;
+        background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(32, 201, 151, 0.1)) !important;
+    }
+
+    .enhanced-alert.alert-danger {
+        border-left-color: #dc3545;
+        background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(255, 107, 107, 0.1)) !important;
+    }
+
+    .messages-container {
+        border-radius: 1.5rem;
+        box-shadow: 0 8px 32px rgba(74, 144, 226, 0.15);
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(74, 144, 226, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .messages-container:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(74, 144, 226, 0.2);
+    }
+
+    .conversation-header {
+        background: var(--blue-light-gradient);
+        color: white;
+        padding: 1.5rem;
+        border-bottom: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .conversation-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+        animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
+    .conversation-list {
+        max-height: 600px;
+        overflow-y: auto;
+        background: rgba(248, 251, 255, 0.8);
+    }
+
+    /* Custom scrollbar for conversation list */
+    .conversation-list::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .conversation-list::-webkit-scrollbar-track {
+        background: rgba(74, 144, 226, 0.1);
+        border-radius: 3px;
+    }
+
+    .conversation-list::-webkit-scrollbar-thumb {
+        background: var(--blue-light-primary);
+        border-radius: 3px;
+        transition: background 0.3s ease;
+    }
+
+    .conversation-list::-webkit-scrollbar-thumb:hover {
+        background: var(--blue-light-dark);
+    }
+
+    .conversation-item {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid rgba(74, 144, 226, 0.1);
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(5px);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .conversation-item::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 0;
+        background: var(--blue-light-gradient);
+        transition: width 0.3s ease;
+    }
+
+    .conversation-item:hover {
+        background: rgba(74, 144, 226, 0.05);
+        transform: translateX(5px);
+        box-shadow: var(--blue-light-soft-glow);
+    }
+
+    .conversation-item:hover::before {
+        width: 4px;
+    }
+
+    .conversation-item.active {
+        background: var(--blue-light-gradient);
+        color: white;
+        box-shadow: var(--blue-light-glow);
+    }
+
+    .conversation-item.active::before {
+        width: 4px;
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .conversation-item.active .text-muted {
+        color: rgba(255, 255, 255, 0.8) !important;
+    }
+
+    .profile-picture {
+        width: 50px;
+        height: 50px;
+        border: 3px solid rgba(74, 144, 226, 0.2);
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(74, 144, 226, 0.15);
+    }
+
+    .conversation-item:hover .profile-picture,
+    .conversation-item.active .profile-picture {
+        transform: scale(1.05);
+        border-color: rgba(255, 255, 255, 0.5);
+        box-shadow: var(--blue-light-glow);
+    }
+
+    .message-bubble {
+        border-radius: 1.25rem;
+        padding: 1rem 1.25rem;
+        max-width: 75%;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        backdrop-filter: blur(5px);
+        margin-bottom: 0.5rem;
+    }
+
+    .message-bubble:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .sent-message {
+        background: var(--blue-light-gradient);
+        color: white;
+        border-bottom-right-radius: 0.5rem !important;
+        box-shadow: var(--blue-light-soft-glow);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .sent-message::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .sent-message:hover::before {
+        left: 100%;
+    }
+
+    .received-message {
+        background: rgba(255, 255, 255, 0.9);
+        border-bottom-left-radius: 0.5rem !important;
+        border: 1px solid rgba(74, 144, 226, 0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    .message-time {
+        font-size: 0.75rem;
+        opacity: 0.8;
+    }
+
+    .sent-message .message-time {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .received-message .message-time {
+        color: #6c757d;
+    }
+
+    /* Conversation view card */
+    .conversation-view-card {
+        border-radius: 1.5rem;
+        box-shadow: 0 8px 32px rgba(74, 144, 226, 0.15);
+        border: 1px solid rgba(74, 144, 226, 0.1);
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.95);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .conversation-view-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(74, 144, 226, 0.2);
+    }
+
+    .conversation-view-header {
+        background: var(--blue-light-gradient);
+        color: white;
+        padding: 1.5rem;
+        border-bottom: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .conversation-view-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+        animation: shimmer 3s infinite;
+    }
+
+    .conversation-view-header .profile-picture {
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .conversation-messages {
+        height: 400px;
+        overflow-y: auto;
+        padding: 1.5rem;
+        background: linear-gradient(180deg, rgba(248, 251, 255, 0.8) 0%, rgba(232, 244, 255, 0.8) 100%);
+        backdrop-filter: blur(5px);
+    }
+
+    .conversation-messages::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .conversation-messages::-webkit-scrollbar-track {
+        background: rgba(74, 144, 226, 0.1);
+        border-radius: 3px;
+    }
+
+    .conversation-messages::-webkit-scrollbar-thumb {
+        background: var(--blue-light-primary);
+        border-radius: 3px;
+        transition: background 0.3s ease;
+    }
+
+    .conversation-messages::-webkit-scrollbar-thumb:hover {
+        background: var(--blue-light-dark);
+    }
+
+    /* Message form styling */
+    .message-form-footer {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        padding: 1.5rem;
+        border-top: 1px solid rgba(74, 144, 226, 0.1);
+    }
+
+    .input-group .form-control {
+        border: 2px solid rgba(74, 144, 226, 0.2);
+        border-radius: 0.75rem 0 0 0.75rem;
+        padding: 0.75rem 1rem;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(5px);
+        transition: all 0.3s ease;
+    }
+
+    .input-group .form-control:focus {
+        border-color: var(--blue-light-primary);
+        box-shadow: var(--blue-light-soft-glow);
+        background: white;
+    }
+
+    .input-group .btn {
+        background: var(--blue-light-gradient);
+        border: 2px solid var(--blue-light-primary);
+        border-radius: 0 0.75rem 0.75rem 0;
+        padding: 0.75rem 1.5rem;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: var(--blue-light-soft-glow);
+    }
+
+    .input-group .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--blue-light-glow);
+    }
+
+    /* Empty state styling */
+    .empty-state {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 1.5rem;
+        padding: 3rem;
+        text-align: center;
+        border: 1px solid rgba(74, 144, 226, 0.1);
+    }
+
+    .empty-state i {
+        color: var(--blue-light-primary);
+        opacity: 0.6;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    /* Badge styling */
+    .badge {
+        background: linear-gradient(135deg, #dc3545 0%, #ff6b6b 100%) !important;
+        border-radius: 1rem;
+        padding: 0.3rem 0.6rem;
+        font-size: 0.7rem;
+        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    /* Announcement link styling */
+    .announcement-link {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(5px);
+        transition: all 0.3s ease;
+    }
+
+    .announcement-link:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateX(3px);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .messages-container {
+            margin-bottom: 1.5rem;
+        }
+        
+        .conversation-messages {
+            height: 300px;
+            padding: 1rem;
+        }
+        
+        .message-bubble {
+            max-width: 85%;
+        }
+    }
+
+    /* Loading animation for message sending */
+    .sending-animation {
+        opacity: 0.7;
+        animation: sending 1s infinite;
+    }
+
+    @keyframes sending {
+        0%, 100% { opacity: 0.7; }
+        50% { opacity: 1; }
+    }
+</style>
+
+<div class="container my-5">
+    <div class="row">
+        <!-- Conversations List Column -->
+        <div class="col-lg-4 mb-4">
+            <div class="card messages-container">
+                <div class="conversation-header">
+                    <h5 class="mb-0 position-relative">
+                        <i class="bi bi-chat-left-text me-2"></i>Messages
+                    </h5>
+                </div>
+                <div class="list-group list-group-flush conversation-list">
+                    {% for conv in conversations %}
+                    <a href="{% url 'messages' %}?recipient={{ conv.other_user.pk }}"
+                       class="list-group-item list-group-item-action conversation-item {% if active_recipient and active_recipient.pk == conv.other_user.pk %}active{% endif %}">
+                        <div class="d-flex align-items-center position-relative">
+                            <img src="{{ conv.other_user.profile_picture.url }}"
+                                 class="profile-picture rounded-circle me-3"
+                                 alt="{{ conv.other_user.username }}">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1 fw-bold">{{ conv.other_user.get_full_name|default:conv.other_user.username }}</h6>
+                                <small class="{% if active_recipient and active_recipient.pk == conv.other_user.pk %}text-white-75{% else %}text-muted{% endif %}">
+                                    {{ conv.last_message.content|truncatechars:30 }}
+                                </small>
+                            </div>
+                            {% if conv.unread %}
+                            <span class="badge bg-danger rounded-pill ms-2">New</span>
+                            {% endif %}
+                        </div>
+                    </a>
+                    {% empty %}
+                    <div class="list-group-item border-0">
+                        <div class="empty-state">
+                            <i class="bi bi-chat-square-text fs-1 mb-3 d-block"></i>
+                            <h5 class="text-primary">No conversations</h5>
+                            <p class="text-muted mb-0">Start a conversation by messaging another user</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Conversation View Column -->
+        <div class="col-lg-8">
+            {% if active_recipient %}
+            <div class="card conversation-view-card h-100">
+                <div class="card-header conversation-view-header d-flex align-items-center">
+                    <img src="{{ active_recipient.profile_picture.url }}"
+                         class="profile-picture rounded-circle me-3 position-relative"
+                         alt="{{ active_recipient.username }}">
+                    <h5 class="mb-0 position-relative">{{ active_recipient.get_full_name|default:active_recipient.username }}</h5>
+                </div>
+                <div class="card-body p-0">
+                    <!-- Message History -->
+                    <div class="conversation-messages">
+                        {% for msg in conversation %}
+                        <div class="d-flex mb-3 {% if msg.sender == request.user %}justify-content-end{% endif %}">
+                            <div class="message-bubble {% if msg.sender == request.user %}sent-message{% else %}received-message{% endif %}">
+                                <div class="d-flex justify-content-between align-items-end">
+                                    <div class="flex-grow-1">{{ msg.content }}</div>
+                                    <span class="message-time ms-3">
+                                        {{ msg.created_at|time }}
+                                    </span>
+                                </div>
+                                {% if msg.announcement %}
+                                <div class="mt-2">
+                                    <a href="{% url 'announcement-detail' msg.announcement.pk %}" 
+                                       class="text-decoration-none announcement-link d-inline-block">
+                                        <i class="bi bi-link-45deg me-1"></i>
+                                        {{ msg.announcement.title|truncatechars:30 }}
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Message Form -->
+                    <div class="message-form-footer">
+                        <form method="POST" id="messageForm">
+                            {% csrf_token %}
+                            <div class="input-group">
+                                {{ form.content }}
+                                <button class="btn btn-primary" type="submit" id="sendBtn">
+                                    <i class="bi bi-send"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="card conversation-view-card h-100">
+                <div class="card-body d-flex flex-column align-items-center justify-content-center empty-state">
+                    <i class="bi bi-chat-left-text fs-1 mb-3 d-block"></i>
+                    <h4 class="text-primary">Select a conversation</h4>
+                    <p class="text-muted mb-0">Choose a conversation from the list to view messages</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const messageForm = document.getElementById('messageForm');
+    const sendBtn = document.getElementById('sendBtn');
+    const messagesContainer = document.querySelector('.conversation-messages');
+    
+    if (messageForm) {
+        messageForm.addEventListener('submit', function(e) {
+            // Add sending animation
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>';
+            
+            // Scroll to bottom after a short delay
+            setTimeout(() => {
+                if (messagesContainer) {
+                    messagesContainer.scrollTo({
+                        top: messagesContainer.scrollHeight,
+                        behavior: 'smooth'
+                    });
+                }
+            }, 100);
+        });
+    }
+    
+    // Auto-scroll to bottom on page load
+    if (messagesContainer) {
+        messagesContainer.scrollTo({
+            top: messagesContainer.scrollHeight,
+            behavior: 'smooth'
+        });
+    }
+    
+    // Add hover effects to message bubbles
+    const messageBubbles = document.querySelectorAll('.message-bubble');
+    messageBubbles.forEach(bubble => {
+        bubble.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+        
+        bubble.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+});
+</script>
+{% endblock %}

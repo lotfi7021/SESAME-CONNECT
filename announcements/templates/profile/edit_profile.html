@@ -1,0 +1,667 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Profile - University Announcements{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --university-primary: #87CEEB;
+        --university-secondary: #4682B4;
+        --gradient-primary: linear-gradient(135deg, #87CEEB 0%, #4682B4 100%);
+        --gradient-secondary: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+        --shadow-light: 0 2px 10px rgba(135, 206, 235, 0.15);
+        --shadow-medium: 0 8px 30px rgba(135, 206, 235, 0.2);
+        --shadow-heavy: 0 20px 60px rgba(135, 206, 235, 0.25);
+        --border-radius: 16px;
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+        background: linear-gradient(135deg, #87CEEB 0%, #65a7c7 100%);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .profile-edit-container {
+        min-height: 100vh;
+        padding: 2rem 0;
+        background: linear-gradient(135deg, #f0f9ff 0%, #e6f3ff 100%);
+    }
+
+    .profile-edit-card {
+        border: none;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-heavy);
+        background: white;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        transition: var(--transition);
+        max-width: 2000px;
+        margin: 0 auto;
+    }
+
+    .profile-edit-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 25px 80px rgba(135, 206, 235, 0.3);
+    }
+
+    .profile-edit-header {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-edit-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+        opacity: 0.3;
+    }
+
+    .profile-edit-title {
+        font-weight: 700;
+        font-size: 2.2rem;
+        letter-spacing: -0.025em;
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-align: center;
+        justify-content: center;
+    }
+
+    .profile-edit-title i {
+        font-size: 2.5rem;
+        opacity: 0.9;
+    }
+
+    .card-body {
+        padding: 3rem;
+        background: var(--gradient-secondary);
+    }
+
+    .form-section {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 2.5rem;
+        box-shadow: var(--shadow-light);
+        transition: var(--transition);
+        margin-bottom: 2rem;
+    }
+
+    .form-section:hover {
+        box-shadow: var(--shadow-medium);
+    }
+
+    .profile-picture-section {
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-picture-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--gradient-primary);
+    }
+
+    .profile-picture-preview {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 5px solid var(--university-secondary);
+        margin: 1.5rem 0;
+        box-shadow: var(--shadow-medium);
+        transition: var(--transition);
+        position: relative;
+    }
+
+    .profile-picture-preview:hover {
+        transform: scale(1.05);
+        box-shadow: 0 15px 40px rgba(70, 130, 180, 0.3);
+    }
+
+    .section-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: var(--university-secondary);
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--university-secondary);
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1rem;
+        letter-spacing: -0.01em;
+    }
+
+    .form-control {
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1.2rem 1.5rem;
+        font-size: 1.1rem;
+        transition: var(--transition);
+        background: #fafbfc;
+        width: 100%;
+    }
+
+    .form-control:focus {
+        border-color: var(--university-secondary);
+        background: white;
+        box-shadow: 0 0 0 4px rgba(70, 130, 180, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .form-control::placeholder {
+        color: #94a3b8;
+        font-style: italic;
+    }
+
+    .form-control-lg {
+        padding: 1.5rem 1.75rem;
+        font-size: 1.2rem;
+    }
+
+    .file-upload {
+        position: relative;
+        overflow: hidden;
+        border-radius: 12px;
+        margin-top: 1.5rem;
+    }
+
+    .file-upload-input {
+        position: absolute;
+        font-size: 100px;
+        opacity: 0;
+        right: 0;
+        top: 0;
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+    }
+
+    .file-upload-label {
+        display: block;
+        padding: 2rem 2.5rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border: 2px dashed var(--university-secondary);
+        border-radius: 12px;
+        text-align: center;
+        cursor: pointer;
+        transition: var(--transition);
+        font-weight: 500;
+        color: var(--university-secondary);
+    }
+
+    .file-upload-label:hover {
+        background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+        border-color: var(--university-primary);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-light);
+    }
+
+    .file-upload-label i {
+        font-size: 2rem;
+        margin-bottom: 0.75rem;
+        display: block;
+    }
+
+    .btn {
+        border-radius: 12px;
+        padding: 1.2rem 2.5rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: var(--transition);
+        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .save-btn {
+        background: var(--gradient-primary);
+        color: white;
+        box-shadow: var(--shadow-medium);
+        min-width: 200px;
+    }
+
+    .save-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 40px rgba(70, 130, 180, 0.3);
+    }
+
+    .save-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .save-btn:hover::before {
+        left: 100%;
+    }
+
+    .cancel-btn {
+        background: white;
+        border: 2px solid var(--university-secondary);
+        color: var(--university-secondary);
+        box-shadow: var(--shadow-light);
+        min-width: 200px;
+    }
+
+    .cancel-btn:hover {
+        background: var(--university-secondary);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+    }
+
+    .form-actions {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 2.5rem;
+        box-shadow: var(--shadow-light);
+        border-top: 4px solid var(--university-secondary);
+        text-align: center;
+    }
+
+    .invalid-feedback {
+        font-weight: 500;
+        margin-top: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .floating-elements {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    .floating-circle {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(70, 130, 180, 0.1);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .floating-circle:nth-child(1) {
+        width: 120px;
+        height: 120px;
+        top: 15%;
+        left: 8%;
+        animation-delay: 0s;
+    }
+
+    .floating-circle:nth-child(2) {
+        width: 90px;
+        height: 90px;
+        top: 50%;
+        right: 10%;
+        animation-delay: 2s;
+    }
+
+    .floating-circle:nth-child(3) {
+        width: 70px;
+        height: 70px;
+        bottom: 15%;
+        left: 15%;
+        animation-delay: 4s;
+    }
+
+    .floating-circle:nth-child(4) {
+        width: 50px;
+        height: 50px;
+        top: 70%;
+        right: 25%;
+        animation-delay: 1s;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-30px) rotate(180deg); }
+    }
+
+    .form-group-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .form-group-single {
+        margin-bottom: 2rem;
+    }
+
+    .textarea-large {
+        min-height: 150px;
+        resize: vertical;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 2rem;
+        }
+        
+        .profile-edit-header {
+            padding: 1.5rem;
+        }
+        
+        .profile-edit-title {
+            font-size: 1.8rem;
+        }
+        
+        .form-section {
+            padding: 1.5rem;
+        }
+        
+        .form-group-row {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .profile-picture-preview {
+            width: 120px;
+            height: 120px;
+        }
+        
+        .btn {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .profile-edit-container {
+            padding: 1rem 0;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .form-actions {
+            padding: 1.5rem;
+        }
+        
+        .btn {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+    }
+
+    .btn.loading {
+        pointer-events: none;
+        opacity: 0.7;
+    }
+
+    .btn.loading::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        margin: auto;
+        border: 2px solid transparent;
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+
+<div class="profile-edit-container">
+    <div class="floating-elements">
+        <div class="floating-circle"></div>
+        <div class="floating-circle"></div>
+        <div class="floating-circle"></div>
+        <div class="floating-circle"></div>
+    </div>
+    
+    <div class="container-fluid px-4">
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <div class="card profile-edit-card">
+                    <div class="card-header profile-edit-header">
+                        <h3 class="profile-edit-title mb-0">
+                            <i class="bi bi-person-gear"></i>
+                            Edit Your Profile
+                        </h3>
+                    </div>
+                    
+                    <div class="card-body">
+                        <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                            {% csrf_token %}
+                            
+                            <!-- Profile Picture Section -->
+                            <div class="form-section profile-picture-section">
+                                <div class="section-title">
+                                    <i class="bi bi-camera"></i>
+                                    Profile Picture
+                                </div>
+                                
+                                {% if user.profile_picture %}
+                                    <img id="profile-preview" src="{{ user.profile_picture.url }}" class="profile-picture-preview" alt="Current profile picture">
+                                {% else %}
+                                    <img id="profile-preview" src="https://via.placeholder.com/150/4682B4/FFFFFF?text=Photo" class="profile-picture-preview" alt="Profile picture placeholder">
+                                {% endif %}
+                                
+                                <div class="file-upload">
+                                    <label for="id_profile_picture" class="file-upload-label">
+                                        <i class="bi bi-cloud-upload"></i>
+                                        <strong>Upload New Picture</strong>
+                                        <br><small>JPG, PNG or GIF (Max 5MB)</small>
+                                        <input type="file" class="file-upload-input form-control" id="id_profile_picture" 
+                                               name="profile_picture" accept="image/*" onchange="previewImage(this)">
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Personal Information Section -->
+                            <div class="form-section">
+                                <div class="section-title">
+                                    <i class="bi bi-person"></i>
+                                    Personal Information
+                                </div>
+                                
+                                <div class="form-group-row">
+                                    <div>
+                                        <label for="id_first_name" class="form-label">
+                                            <i class="bi bi-person-badge"></i>
+                                            First Name
+                                        </label>
+                                        <input type="text" class="form-control form-control-lg" id="id_first_name" 
+                                               name="first_name" value="{{ user.first_name }}" placeholder="Enter your first name">
+                                    </div>
+                                    <div>
+                                        <label for="id_last_name" class="form-label">
+                                            <i class="bi bi-person-badge"></i>
+                                            Last Name
+                                        </label>
+                                        <input type="text" class="form-control form-control-lg" id="id_last_name" 
+                                               name="last_name" value="{{ user.last_name }}" placeholder="Enter your last name">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Account Information Section -->
+                            <div class="form-section">
+                                <div class="section-title">
+                                    <i class="bi bi-gear"></i>
+                                    Account Information
+                                </div>
+                                
+                                <div class="form-group-single">
+                                    <label for="id_username" class="form-label">
+                                        <i class="bi bi-at"></i>
+                                        Username
+                                    </label>
+                                    <input type="text" class="form-control form-control-lg" id="id_username" 
+                                           name="username" value="{{ user.username }}" required placeholder="Choose a unique username">
+                                    <div class="invalid-feedback">
+                                        <i class="bi bi-exclamation-circle"></i>
+                                        Please choose a username.
+                                    </div>
+                                </div>
+
+                                <div class="form-group-single">
+                                    <label for="id_email" class="form-label">
+                                        <i class="bi bi-envelope"></i>
+                                        Email Address
+                                    </label>
+                                    <input type="email" class="form-control form-control-lg" id="id_email" 
+                                           name="email" value="{{ user.email }}" required placeholder="your.email@university.edu">
+                                    <div class="invalid-feedback">
+                                        <i class="bi bi-exclamation-circle"></i>
+                                        Please provide a valid email address.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- About Section -->
+                            <div class="form-section">
+                                <div class="section-title">
+                                    <i class="bi bi-journal-text"></i>
+                                    About You
+                                </div>
+                                
+                                <div class="form-group-single">
+                                    <label for="id_bio" class="form-label">
+                                        <i class="bi bi-card-text"></i>
+                                        Bio
+                                    </label>
+                                    <textarea class="form-control textarea-large" id="id_bio" name="bio" 
+                                              rows="6" placeholder="Tell others about yourself, your interests, and what you're studying...">{{ user.bio }}</textarea>
+                                </div>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="form-actions">
+                                <div class="d-flex gap-3 justify-content-center flex-wrap">
+                                    <a href="{% url 'profile' user.username %}" class="btn cancel-btn">
+                                        <i class="bi bi-x-circle me-2"></i>Cancel Changes
+                                    </a>
+                                    <button type="submit" class="btn save-btn text-white" onclick="this.classList.add('loading')">
+                                        <i class="bi bi-save me-2"></i>Save Changes
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Image preview functionality with enhanced validation
+    function previewImage(input) {
+        const preview = document.getElementById('profile-preview');
+        const file = input.files[0];
+        
+        if (file) {
+            // Validate file size (5MB limit)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size must be less than 5MB');
+                input.value = '';
+                return;
+            }
+            
+            // Validate file type
+            if (!file.type.match(/^image\/(jpeg|jpg|png|gif)$/)) {
+                alert('Please select a valid image file (JPG, PNG, or GIF)');
+                input.value = '';
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onloadend = function() {
+                preview.src = reader.result;
+                preview.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    preview.style.transform = 'scale(1)';
+                }, 300);
+            }
+            reader.readAsDataURL(file);
+        } else {
+            preview.src = "{% if user.profile_picture %}{{ user.profile_picture.url }}{% else %}https://via.placeholder.com/150/4682B4/FFFFFF?text=Photo{% endif %}";
+        }
+    }
+
+    // Enhanced form validation with smooth animations
+    (function() {
+        'use strict';
+        const forms = document.querySelectorAll('.needs-validation');
+        
+        Array.prototype.slice.call(forms).forEach(function(form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    
+                    // Smooth scroll to first invalid field
+                    const firstInvalidField = form.querySelector(':invalid');
+                    if (firstInvalidField) {
+                        firstInvalidField.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'center' 
+                        });
+                        firstInvalidField.focus();
+                    }
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+
+    // Add real-time validation feedback
+    document.querySelectorAll('.form-control').forEach(field => {
+        field.addEventListener('input', function() {
+            if (this.checkValidity()) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            } else {
+                this.classList.remove('is-valid');
+                this.classList.add('is-invalid');
+            }
+        });
+    });
+
+    // Add loading animation on form submission
+    document.querySelector('form').addEventListener('submit', function() {
+        const submitBtn = this.querySelector('.save-btn');
+        submitBtn.classList.add('loading');
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Saving...';
+    });
+</script>
+
+{% endblock %}

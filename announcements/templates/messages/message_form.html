@@ -1,0 +1,523 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<style>
+    :root {
+        --blue-lumiere-primary: #1e3a8a;
+        --blue-lumiere-secondary: #3b82f6;
+        --blue-lumiere-light: #dbeafe;
+        --blue-lumiere-accent: #60a5fa;
+        --blue-lumiere-dark: #1e40af;
+        --blue-lumiere-gradient: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%);
+        --blue-lumiere-glass: rgba(59, 130, 246, 0.1);
+        --blue-lumiere-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+    }
+
+    .message-form-card {
+        border-radius: 1.25rem;
+        box-shadow: 
+            0 20px 25px -5px rgba(30, 58, 138, 0.1),
+            0 10px 10px -5px rgba(30, 58, 138, 0.04),
+            var(--blue-lumiere-glow);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+
+    .message-form-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 
+            0 25px 50px -12px rgba(30, 58, 138, 0.25),
+            var(--blue-lumiere-glow);
+    }
+
+    .message-header {
+        background: var(--blue-lumiere-gradient);
+        color: white;
+        border-bottom: 3px solid var(--blue-lumiere-accent);
+        border-radius: 1.25rem 1.25rem 0 0;
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .message-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+        animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
+    .message-card {
+        max-width: 75%;
+        border-radius: 1rem;
+        border: none;
+        box-shadow: 
+            0 4px 6px -1px rgba(30, 58, 138, 0.1),
+            0 2px 4px -1px rgba(30, 58, 138, 0.06);
+        transition: all 0.3s ease;
+        margin-bottom: 0.75rem;
+    }
+
+    .message-card:hover {
+        transform: translateY(-1px);
+        box-shadow: 
+            0 10px 15px -3px rgba(30, 58, 138, 0.1),
+            0 4px 6px -2px rgba(30, 58, 138, 0.05);
+    }
+
+    .sent-message {
+        background: var(--blue-lumiere-gradient);
+        color: white;
+        margin-left: auto;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .sent-message::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        right: -10px;
+        width: 0;
+        height: 0;
+        border-left: 10px solid var(--blue-lumiere-secondary);
+        border-top: 10px solid transparent;
+        border-bottom: 10px solid transparent;
+        transform: translateY(-50%);
+    }
+
+    .received-message {
+        background: linear-gradient(135deg, #f8fafc 0%, var(--blue-lumiere-light) 100%);
+        margin-right: auto;
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .received-message::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: -10px;
+        width: 0;
+        height: 0;
+        border-right: 10px solid var(--blue-lumiere-light);
+        border-top: 10px solid transparent;
+        border-bottom: 10px solid transparent;
+        transform: translateY(-50%);
+    }
+
+    .message-time {
+        font-size: 0.75rem;
+        opacity: 0.8;
+    }
+
+    .conversation-container {
+        max-height: 450px;
+        overflow-y: auto;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc 0%, var(--blue-lumiere-light) 100%);
+        border-radius: 0.75rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+    .conversation-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(30, 58, 138, 0.1) 0%, transparent 50%);
+        pointer-events: none;
+    }
+
+    .conversation-container::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .conversation-container::-webkit-scrollbar-track {
+        background: rgba(59, 130, 246, 0.1);
+        border-radius: 3px;
+    }
+
+    .conversation-container::-webkit-scrollbar-thumb {
+        background: var(--blue-lumiere-secondary);
+        border-radius: 3px;
+    }
+
+    .conversation-container::-webkit-scrollbar-thumb:hover {
+        background: var(--blue-lumiere-primary);
+    }
+
+    .send-btn {
+        background: var(--blue-lumiere-gradient);
+        border: none;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.39);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .send-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .send-btn:hover::before {
+        left: 100%;
+    }
+
+    .send-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px 0 rgba(59, 130, 246, 0.5);
+    }
+
+    .send-btn:active {
+        transform: translateY(0);
+    }
+
+    .cancel-btn {
+        border: 2px solid var(--blue-lumiere-secondary);
+        color: var(--blue-lumiere-primary);
+        border-radius: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        background: rgba(59, 130, 246, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .cancel-btn:hover {
+        background: var(--blue-lumiere-light);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    }
+
+    .profile-picture {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--blue-lumiere-accent);
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .profile-picture:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+    }
+
+    .profile-picture-sm {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--blue-lumiere-accent);
+        box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .profile-picture-sm:hover {
+        transform: scale(1.1);
+    }
+
+    .form-control {
+        border: 2px solid rgba(59, 130, 246, 0.2);
+        border-radius: 0.75rem;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.8);
+    }
+
+    .form-control:focus {
+        border-color: var(--blue-lumiere-secondary);
+        box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+        background: white;
+    }
+
+    .toast {
+        border-radius: 0.75rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .message-username {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.5rem;
+        font-size: 0.75rem;
+        margin-bottom: 0.5rem;
+        display: inline-block;
+    }
+
+    .announcement-badge {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+    }
+
+    .bi {
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .message-card {
+            max-width: 85%;
+        }
+        
+        .conversation-container {
+            max-height: 350px;
+            padding: 1rem;
+        }
+        
+        .message-header {
+            padding: 1rem;
+        }
+    }
+</style>
+
+<div class="container my-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card message-form-card">
+                <div class="card-header message-header">
+                    <div class="d-flex align-items-center position-relative">
+                        <img src="{{ receiver.profile_picture.url }}" 
+                             class="profile-picture me-3" 
+                             alt="{{ receiver.username }}">
+                        <div>
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-envelope me-2"></i>{{ receiver.username }}
+                            </h5>
+                            {% if announcement %}
+                            <div class="announcement-badge">
+                                <i class="bi bi-megaphone me-1"></i>Regarding: {{ announcement.title }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conversation History -->
+                <div class="conversation-container" id="conversationContainer">
+                    {% for message in conversation %}
+                    <div class="d-flex {% if message.sender == user %}justify-content-end{% else %}justify-content-start{% endif %} mb-3">
+                        <div class="message-card {% if message.sender == user %}sent-message{% else %}received-message{% endif %}">
+                            <div class="card-body p-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <img src="{{ message.sender.profile_picture.url }}" 
+                                         class="profile-picture-sm me-2" 
+                                         alt="{{ message.sender.username }}">
+                                    <div class="message-username {% if message.sender == user %}text-white{% else %}text-primary{% endif %}">
+                                        {{ message.sender.username }}
+                                    </div>
+                                </div>
+                                <p class="card-text mb-2">{{ message.content }}</p>
+                                <small class="message-time {% if message.sender == user %}text-white{% else %}text-muted{% endif %}">
+                                    <i class="bi bi-clock me-1"></i>{{ message.created_at|date:"M j, g:i A" }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Message Form -->
+                <div class="card-body">
+                    <form method="POST" id="messageForm">
+                        {% csrf_token %}
+                        {% if announcement %}
+                        <input type="hidden" name="announcement_id" value="{{ announcement.id }}">
+                        {% endif %}
+                        <div class="mb-4">
+                            {{ form.content|as_crispy_field }}
+                        </div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'messages' %}" class="btn cancel-btn me-md-2">
+                                <i class="bi bi-x-circle me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn send-btn text-white" id="sendButton">
+                                <i class="bi bi-send me-1"></i>Send Message
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('messageForm');
+        const conversationContainer = document.getElementById('conversationContainer');
+        const sendButton = document.getElementById('sendButton');
+        const messageInput = document.querySelector('textarea[name="content"]');
+        
+        // Scroll to bottom of conversation with smooth animation
+        function scrollToBottom() {
+            conversationContainer.scrollTo({
+                top: conversationContainer.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+        
+        scrollToBottom();
+        
+        // Handle Enter key submission
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                submitForm();
+            }
+        });
+        
+        // Handle form submission
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitForm();
+        });
+        
+        function submitForm() {
+            const formData = new FormData(form);
+            const content = formData.get('content').trim();
+            
+            if (!content) return;
+            
+            // Enhanced button animation during submission
+            sendButton.disabled = true;
+            sendButton.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Sending...';
+            sendButton.style.transform = 'scale(0.95)';
+            
+            fetch("{% url 'create-message' receiver.id %}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Create new message element with animation
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = 'd-flex justify-content-end mb-3';
+                    messageDiv.style.opacity = '0';
+                    messageDiv.style.transform = 'translateY(20px)';
+                    messageDiv.innerHTML = `
+                        <div class="message-card sent-message">
+                            <div class="card-body p-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <img src="{{ user.profile_picture.url }}" 
+                                         class="profile-picture-sm me-2" 
+                                         alt="{{ user.username }}">
+                                    <div class="message-username text-white">
+                                        {{ user.username }}
+                                    </div>
+                                </div>
+                                <p class="card-text mb-2">${content}</p>
+                                <small class="message-time text-white">
+                                    <i class="bi bi-clock me-1"></i>${data.message.created_at}
+                                </small>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Append new message to conversation
+                    conversationContainer.appendChild(messageDiv);
+                    
+                    // Animate the new message
+                    setTimeout(() => {
+                        messageDiv.style.transition = 'all 0.3s ease';
+                        messageDiv.style.opacity = '1';
+                        messageDiv.style.transform = 'translateY(0)';
+                    }, 10);
+                    
+                    // Clear form and scroll to bottom
+                    messageInput.value = '';
+                    setTimeout(scrollToBottom, 100);
+                    
+                    // Show success toast
+                    const toast = new bootstrap.Toast(document.getElementById('messageToast'));
+                    toast.show();
+                } else {
+                    console.error(data.errors);
+                    showErrorMessage('There was an error sending your message. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showErrorMessage('There was an error sending your message. Please try again.');
+            })
+            .finally(() => {
+                // Re-enable button with animation
+                sendButton.disabled = false;
+                sendButton.innerHTML = '<i class="bi bi-send me-1"></i>Send Message';
+                sendButton.style.transform = 'scale(1)';
+            });
+        }
+        
+        function showErrorMessage(message) {
+            // Create error toast dynamically
+            const errorToast = document.createElement('div');
+            errorToast.className = 'toast align-items-center text-white bg-danger border-0';
+            errorToast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            document.querySelector('.toast-container').appendChild(errorToast);
+            const toast = new bootstrap.Toast(errorToast);
+            toast.show();
+        }
+    });
+</script>
+
+<!-- Toast Container -->
+<div class="position-fixed bottom-0 end-0 p-3 toast-container" style="z-index: 11">
+    <!-- Success Toast -->
+    <div id="messageToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                Message sent successfully!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+{% endblock %}y

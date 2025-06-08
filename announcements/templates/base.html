@@ -1,0 +1,1056 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SESAME CONNECT {% endblock %}</title>
+    
+    <!-- Bootstrap and Icon Libraries -->
+     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --university-primary: #87ceeb;
+            --university-secondary: #4682b4;
+            --university-light: #f0f8ff;
+            --university-dark: #1e3a5f;
+            --university-accent: #6ba3d0;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-light: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --gradient-primary: linear-gradient(135deg, #87ceeb 0%, #4682b4 100%);
+            --gradient-secondary: linear-gradient(135deg, #b0e0e6 0%, #87ceeb 100%);
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #87ceeb 0%, #4682b4 100%);
+            min-height: 100vh;
+            width: 100%;
+            line-height: 1.6;
+            color: var(--text-primary);
+            position: relative;
+            padding-bottom: 80px; /* Add space for fixed footer */
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(135, 206, 235, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(70, 130, 180, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        /* Profile and Image Styles */
+        .profile-picture {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--university-secondary);
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .profile-picture:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .announcement-image {
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 1rem;
+            box-shadow: var(--shadow-md);
+            transition: transform 0.3s ease;
+        }
+        
+        .announcement-image:hover {
+            transform: scale(1.02);
+        }
+        
+        /* Layout Styles */
+        .message-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Custom Alert Styles */
+        .alert {
+            margin-bottom: 1rem;
+            border-radius: 1rem;
+            border: none;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            animation: slideInDown 0.5s ease-out;
+        }
+        
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .alert::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: currentColor;
+        }
+        
+:root {
+      --primary: #6C63FF;
+      --secondary: #4D8AF0;
+      --light: #F8F9FA;
+      --dark: #2B2D42;
+      --border-radius: 16px;
+      --shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    
+    #chat-container {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 1000;
+      font-family: 'Quicksand', sans-serif;
+    }
+    
+    #chat-toggle {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border: none;
+      border-radius: 50px;
+      width: 60px;
+      height: 60px;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    #chat-toggle:hover {
+      transform: scale(1.05);
+      box-shadow: 0 12px 24px rgba(108, 99, 255, 0.3);
+    }
+    
+    #chat-toggle.open {
+      transform: rotate(90deg);
+    }
+    
+    #chat-box {
+      width: 350px;
+      height: 500px;
+      border-radius: var(--border-radius);
+      background: white;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transform: translateY(20px) scale(0.95);
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+    }
+    
+    #chat-box.open {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .chat-header {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .bot-avatar {
+      width: 40px;
+      height: 40px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      font-size: 1rem;
+    }
+    
+    .chat-title {
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    
+    #messages {
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+      background: var(--light);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      scroll-behavior: smooth;
+    }
+    
+    .message {
+      padding: 0.75rem 1rem;
+      border-radius: var(--border-radius);
+      position: relative;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: messageAppear 0.4s ease-out forwards;
+      max-width: 85%;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .user-message {
+      background: white;
+      border: 1px solid rgba(108, 99, 255, 0.2);
+      margin-left: auto;
+      border-top-right-radius: 4px;
+    }
+    
+    .bot-message {
+      background: white;
+      border: 1px solid rgba(77, 138, 240, 0.2);
+      margin-right: auto;
+      border-top-left-radius: 4px;
+    }
+    
+    .message-content {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .message-sender {
+      font-weight: 700;
+      font-size: 0.75rem;
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .user-sender {
+      color: var(--primary);
+      justify-content: flex-end;
+    }
+    
+    .bot-sender {
+      color: var(--secondary);
+      justify-content: flex-start;
+    }
+    
+    .message-text {
+      word-wrap: break-word;
+      font-size: 0.95rem;
+    }
+    
+    .input-area {
+      display: flex;
+      padding: 1rem;
+      border-top: 1px solid rgba(0, 0, 0, 0.05);
+      background: white;
+    }
+    
+    #user-input {
+      flex: 1;
+      padding: 0.75rem 1.25rem;
+      border: 1px solid rgba(108, 99, 255, 0.3);
+      border-radius: 50px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: var(--transition);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    #user-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(108, 99, 255, 0.2);
+    }
+    
+    #send-button {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 0 1.25rem;
+      margin-left: 0.75rem;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(108, 99, 255, 0.3);
+    }
+    
+    #send-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(108, 99, 255, 0.4);
+    }
+    
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: white;
+      border-radius: var(--border-radius);
+      margin: 0 1.5rem 1rem;
+      width: fit-content;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .typing-indicator.visible {
+      opacity: 1;
+    }
+    
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--secondary);
+      border-radius: 50%;
+      animation: typingAnimation 1.4s infinite ease-in-out;
+    }
+    
+    .typing-dot:nth-child(1) { animation-delay: 0s; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    
+    @keyframes messageAppear {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes typingAnimation {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-5px); }
+    }
+
+    /* CHATBOOT */
+
+        .alert-success {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%);
+            color: #065f46;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+        
+        .alert-danger {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%);
+            color: #991b1b;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        
+        .alert-warning {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.05) 100%);
+            color: #92400e;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+        
+        .alert-info {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.05) 100%);
+            color: #1e40af;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        
+        /* University Theme Customizations */
+        .navbar {
+            background: linear-gradient(135deg, rgba(135, 206, 235, 0.95) 0%, rgba(70, 130, 180, 0.95) 100%) !important;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(135, 206, 235, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: white !important;
+        }
+        
+        .navbar-brand:hover {
+            transform: scale(1.05);
+            color: var(--university-secondary) !important;
+        }
+        
+        .navbar-brand img {
+            height: 30px;
+            width: auto;
+            margin-right: 10px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-brand:hover img {
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        }
+        
+        .nav-link {
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9) !important;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 0.75rem 1rem !important;
+            border-radius: 0.5rem;
+            margin: 0 0.25rem;
+        }
+        
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--university-secondary);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+        
+        .nav-link:hover {
+            color: white !important;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-link:hover::before {
+            width: 60%;
+        }
+        
+        .dropdown-menu {
+            background: rgba(240, 248, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(135, 206, 235, 0.3);
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(135, 206, 235, 0.4);
+            animation: dropdownFadeIn 0.3s ease-out;
+        }
+        
+        @keyframes dropdownFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .dropdown-item {
+            transition: all 0.3s ease;
+            border-radius: 0.5rem;
+            margin: 0.25rem;
+            font-weight: 500;
+        }
+        
+        .dropdown-item:hover {
+            background: linear-gradient(135deg, var(--university-primary), var(--university-secondary));
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .badge {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        .container {
+            max-width: 1200px;
+        }
+        
+        main.container {
+            background: rgba(240, 248, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 2rem;
+            box-shadow: 0 10px 25px rgba(135, 206, 235, 0.4);
+            border: 1px solid rgba(135, 206, 235, 0.3);
+            margin-top: 2rem;
+            margin-bottom: 100px; /* Add space above fixed footer */
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        main.container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+        
+        /* Footer Styling */
+        footer {
+            background: linear-gradient(135deg, rgba(135, 206, 235, 0.95) 0%, rgba(70, 130, 180, 0.95) 100%) !important;
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: 3rem;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            box-shadow: 0 -4px 20px rgba(135, 206, 235, 0.3);
+            padding: 1.5rem 0 !important;
+        }
+        
+        footer .container {
+            position: relative;
+        }
+        
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+        }
+        
+        footer p {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 500;
+            margin-bottom: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        footer p::before {
+            content: '©';
+            font-size: 1.2em;
+            opacity: 0.7;
+        }
+        
+        footer a {
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.8) !important;
+            font-weight: 500;
+            position: relative;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        footer a::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+        
+        footer a:hover {
+            color: white !important;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        footer a:hover::before {
+            width: 80%;
+        }
+        
+        footer .social-links a {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            margin: 0 0.25rem;
+        }
+        
+        footer .social-links a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        footer .social-links a i {
+            font-size: 1.2rem;
+        }
+        
+        /* Button Enhancements */
+        .btn {
+            border-radius: 0.75rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-close {
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+        
+        /* Navbar toggler animation */
+        .navbar-toggler {
+            border: none;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-toggler:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+        
+        .navbar-toggler:focus {
+            box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.25);
+        }
+        
+        /* Fixed logo animation */
+        .fixed-logo {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            width: 120px;
+            height: auto;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+            transition: all 0.3s ease;
+            opacity: 0.8;
+            z-index: 999;
+        }
+        
+        .fixed-logo:hover {
+            transform: scale(1.1) rotate(5deg);
+            opacity: 1;
+        }
+        
+        /* Responsive improvements */
+        @media (max-width: 768px) {
+            main.container {
+                margin: 1rem;
+                padding: 1rem;
+                border-radius: 1rem;
+            }
+            
+            .navbar-brand img {
+                width: 100px;
+            }
+            
+            .fixed-logo {
+                width: 80px;
+                bottom: 5px;
+                right: 5px;
+            }
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Main Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% if user.is_authenticated %}{% url 'home' %}{% else %}{% url 'login' %}{% endif %}">
+                    <img src="{% static 'announcements/images/5.png' %}" style="width: 120px; height: auto; position: relative; left: 5px; top: 4px;">
+                 CONNECT
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <!-- Left Navigation Items -->
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% if user.is_authenticated %}{% url 'home' %}{% else %}{% url 'login' %}{% endif %}">
+                            <i class="bi bi-house me-1"></i>Home
+                        </a>
+                    </li>
+                    
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'create-announcement' %}">
+                            <i class="bi bi-plus-circle me-1"></i>New Announcement
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'messages' %}">
+                            <i class="bi bi-chat-dots me-1"></i>Messages
+                            {% if unread_messages_count > 0 %}
+                            <span class="badge bg-danger ms-1">{{ unread_messages_count }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+                
+                <!-- Right Navigation Items -->
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            {% if user.profile_picture %}
+                                <img src="{{ user.profile_picture.url }}" class="profile-picture me-2" alt="Profile">
+                            {% else %}
+                                <i class="bi bi-person-circle me-2"></i>
+                            {% endif %}
+                            {{ user.get_full_name|default:user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'profile' user.username %}">
+                                    <i class="bi bi-person me-2"></i>View Profile
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'edit_profile' %}">
+                                    <i class="bi bi-pencil-square me-2"></i>Edit Profile
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'change_password' %}">
+                                    <i class="bi bi-key me-2"></i>Change Password
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'logout' %}">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'register' %}">
+                            <i class="bi bi-person-plus me-1"></i>Register
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="container mt-4">
+        <!-- Flash Messages -->
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        {% if message.tags == 'success' %}
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                        {% elif message.tags == 'error' %}
+                            <i class="bi bi-exclamation-circle-fill me-2"></i>
+                        {% elif message.tags == 'warning' %}
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        {% else %}
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                        {% endif %}
+                        <div>{{ message }}</div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <img src="{% static 'announcements/images/5.png' %}" class="fixed-logo">
+
+        <!-- Page Content -->
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Simple Footer -->
+    <footer class="bg-light py-3 mt-4">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="mb-0 text-muted small">{% now "Y" %} SESAME University. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <div class="d-flex justify-content-center justify-content-md-end align-items-center gap-2">
+                        <a href="#" class="text-muted small">Contact</a>
+                        <a href="#" class="text-muted small">University Website</a>
+                        <div class="social-links ms-2">
+                            <a href="#" class="text-muted"><i class="bi bi-facebook"></i></a>
+                            <a href="#" class="text-muted"><i class="bi bi-twitter"></i></a>
+                            <a href="#" class="text-muted"><i class="bi bi-instagram"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- CHATBOOT -->
+    <div id="chat-container">
+    
+        <div id="chat-box">
+      <div class="chat-header">
+        <div class="bot-avatar">
+          <i class="fas fa-robot"></i>
+        </div>
+        <div class="chat-title">AI Assistant</div>
+      </div>
+      <div id="messages"></div>
+      <div class="typing-indicator" id="typing-indicator">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <span>AI is typing...</span>
+      </div>
+      <div class="input-area">
+        <input type="text" id="user-input" placeholder="Type your message..." autocomplete="off">
+        <button id="send-button"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+    <button id="chat-toggle"><i class="fas fa-comment-dots"></i></button>
+  </div>
+    </footer>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Auto-dismiss alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert');
+            
+            alerts.forEach(function(alert) {
+                setTimeout(function() {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }, 5000);
+            });
+            
+            // Add any additional global JavaScript here
+        });
+    </script>
+    
+    {% block extra_js %}
+    {% endblock %}
+
+
+    
+</body>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const chatToggle = document.getElementById('chat-toggle');
+      const chatBox = document.getElementById('chat-box');
+      const userInput = document.getElementById('user-input');
+      const sendButton = document.getElementById('send-button');
+      const messagesContainer = document.getElementById('messages');
+      const typingIndicator = document.getElementById('typing-indicator');
+      
+      // Toggle chat visibility
+      chatToggle.addEventListener('click', toggleChat);
+      
+      // Send message on button click or Enter key
+      sendButton.addEventListener('click', sendMessage);
+      userInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+      });
+      
+      function toggleChat() {
+        chatBox.classList.toggle('open');
+        chatToggle.classList.toggle('open');
+      }
+      
+      async function sendMessage() {
+        const message = userInput.value.trim();
+        if (!message) return;
+        
+        userInput.value = '';
+        addMessage(message, 'user');
+        
+        // Show typing indicator
+        typingIndicator.classList.add('visible');
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        
+        try {
+          const response = await fetch("/ask/", {
+            method: "POST",
+            headers: { 
+              "Content-Type": "application/json",
+              "X-CSRFToken": getCSRFToken()
+            },
+            body: JSON.stringify({ message })
+          });
+          
+          const data = await response.json();
+          addMessage(data.response, 'bot');
+        } catch (error) {
+          addMessage("Sorry, I'm having trouble connecting. Please try again later.", 'bot');
+          console.error('Error:', error);
+        } finally {
+          typingIndicator.classList.remove('visible');
+        }
+      }
+        const currentUser = "{{ user.first_name|escapejs }}";
+      function addMessage(text, sender) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message', `${sender}-message`);
+        
+        const messageContent = document.createElement('div');
+        messageContent.classList.add('message-content');
+        
+        const senderElement = document.createElement('div');
+        senderElement.classList.add('message-sender', `${sender}-sender`);
+        
+        const senderIcon = document.createElement('i');
+        senderIcon.className = sender === 'user' ? 'fas fa-user' : 'fas fa-robot';
+        
+        const senderName = document.createTextNode(sender === 'user' ? currentUser : 'AI Assistant');
+        
+        senderElement.appendChild(senderIcon);
+        senderElement.appendChild(senderName);
+        
+        const textElement = document.createElement('div');
+        textElement.classList.add('message-text');
+        textElement.textContent = text;
+        
+        messageContent.appendChild(senderElement);
+        messageContent.appendChild(textElement);
+        messageElement.appendChild(messageContent);
+        
+        messagesContainer.appendChild(messageElement);
+        
+        // Trigger animation
+        setTimeout(() => {
+          messageElement.style.opacity = '1';
+          messageElement.style.transform = 'translateY(0)';
+        }, 10);
+        
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+      
+      function getCSRFToken() {
+        const cookie = document.cookie.match(/csrftoken=([^;]+)/);
+        return cookie ? cookie[1] : null;
+      }
+      
+      // Add initial bot message
+      setTimeout(() => {
+        addMessage("Hello! How can I assist you today?", 'bot');
+      }, 500);
+    });
+  </script>
+
+</html>

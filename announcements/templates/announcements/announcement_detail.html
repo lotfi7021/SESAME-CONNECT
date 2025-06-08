@@ -1,0 +1,445 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #87CEEB 0%, #4682B4 100%);
+        --light-gradient: linear-gradient(135deg, rgba(135, 206, 235, 0.1) 0%, rgba(70, 130, 180, 0.1) 100%);
+        --card-shadow: 0 10px 25px rgba(70, 130, 180, 0.15);
+        --hover-shadow: 0 15px 35px rgba(70, 130, 180, 0.25);
+        --text-primary: #2c3e50;
+        --text-secondary: #5a6c7d;
+    }
+
+    body {
+        background: linear-gradient(135deg, #87CEEB 0%, #4682B4 100%);
+        min-height: 100vh;
+    }
+
+    .announcement-card, .author-card, .message-card {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: var(--card-shadow);
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.95);
+        transition: all 0.3s ease;
+    }
+
+    .announcement-card:hover, .author-card:hover, .message-card:hover {
+        box-shadow: var(--hover-shadow);
+        transform: translateY(-2px);
+    }
+
+    .announcement-header, .author-header, .message-header {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 1rem 1rem 0 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .announcement-header::before, 
+    .author-header::before, 
+    .message-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="0.5" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="1.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+    }
+
+    .profile-picture {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid transparent;
+        background: var(--primary-gradient);
+        padding: 2px;
+        transition: all 0.3s ease;
+    }
+
+    .profile-picture:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(70, 130, 180, 0.3);
+    }
+
+    .profile-picture-lg {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid transparent;
+        background: var(--primary-gradient);
+        padding: 3px;
+        transition: all 0.3s ease;
+        margin: 0 auto;
+    }
+
+    .profile-picture-lg:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 25px rgba(70, 130, 180, 0.3);
+    }
+
+    .announcement-image {
+        max-height: 450px;
+        width: 60%;
+        object-fit: cover;
+        border-radius: 1rem;
+        margin: 1.5rem 0;
+        border: 1px solid rgba(70, 130, 180, 0.1);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .announcement-image:hover {
+        transform: scale(1.02);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .badge-type {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-weight: 500;
+        box-shadow: 0 2px 8px rgba(70, 130, 180, 0.3);
+    }
+
+    .badge-category {
+        background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        color: #2c3e50;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-weight: 500;
+        box-shadow: 0 2px 8px rgba(255, 154, 158, 0.3);
+    }
+
+    .badge-price {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        color: #2c3e50;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-weight: 500;
+        box-shadow: 0 2px 8px rgba(168, 237, 234, 0.3);
+    }
+
+    .action-btn {
+        background: transparent;
+        border: 2px solid;
+        border-image: var(--primary-gradient) 1;
+        color: #4682B4;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .action-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: var(--primary-gradient);
+        transition: left 0.3s ease;
+        z-index: -1;
+    }
+
+    .action-btn:hover::before {
+        left: 0;
+    }
+
+    .action-btn:hover {
+        color: white;
+        border-color: transparent;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(70, 130, 180, 0.3);
+    }
+
+    .delete-btn {
+        background: transparent;
+        border: 2px solid #e74c3c;
+        color: #e74c3c;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .delete-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        transition: left 0.3s ease;
+        z-index: -1;
+    }
+
+    .delete-btn:hover::before {
+        left: 0;
+    }
+
+    .delete-btn:hover {
+        color: white;
+        border-color: transparent;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+    }
+
+    .view-profile-btn {
+        background: var(--primary-gradient);
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .view-profile-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(70, 130, 180, 0.4);
+    }
+
+    .card-title {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    .text-muted {
+        color: var(--text-secondary) !important;
+    }
+
+    .announcement-content {
+        line-height: 1.7;
+        color: var(--text-primary);
+        font-size: 1.05rem;
+    }
+
+    .author-info h4 {
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 600;
+    }
+
+    .contact-form {
+        background: var(--light-gradient);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    .floating-decoration {
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        background: radial-gradient(circle, rgba(135, 206, 235, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .floating-decoration:nth-child(1) {
+        top: 10%;
+        right: 10%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .floating-decoration:nth-child(2) {
+        bottom: 20%;
+        left: 15%;
+        width: 150px;
+        height: 150px;
+        animation: float 8s ease-in-out infinite reverse;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(5deg); }
+    }
+
+    .section-divider {
+        height: 2px;
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 1px;
+        margin: 2rem 0;
+    }
+
+    @media (max-width: 768px) {
+        .profile-picture-lg {
+            width: 100px;
+            height: 100px;
+        }
+        
+        .announcement-image {
+            max-height: 300px;
+        }
+        
+        .floating-decoration {
+            display: none;
+        }
+    }
+</style>
+
+<div class="position-relative">
+    <div class="floating-decoration"></div>
+    <div class="floating-decoration"></div>
+    
+    <div class="container my-5">
+        <div class="row g-4">
+            <!-- Main Announcement Content -->
+            <div class="col-lg-8">
+                <div class="card announcement-card">
+                    <div class="card-body p-4">
+                        <!-- Author and Date -->
+                        <div class="d-flex align-items-center mb-4">
+                            <img src="{{ announcement.author.profile_picture.url }}" 
+                                 class="profile-picture me-3" 
+                                 alt="{{ announcement.author.username }}">
+                            <div class="flex-grow-1">
+                                <h1 class="card-title mb-2 fs-2">{{ announcement.title }}</h1>
+                                <div class="text-muted">
+                                    <i class="bi bi-person me-1"></i>Posted by 
+                                    <a href="{% url 'profile' announcement.author.username %}" 
+                                       class="text-decoration-none fw-medium" 
+                                       style="color: #4682B4;">
+                                        {{ announcement.author.username }}
+                                    </a>
+                                    <span class="mx-2">•</span>
+                                    <i class="bi bi-calendar me-1"></i>{{ announcement.created_at|date:"M j, Y" }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Announcement Image -->
+                        {% if announcement.image %}
+                        <div class="text-center my-4">
+                            <img src="{{ announcement.image.url }}" 
+                                 class="announcement-image" 
+                                 alt="{{ announcement.title }}">
+                        </div>
+                        {% endif %}
+
+                        <!-- Announcement Content -->
+                        <div class="announcement-content mb-4">
+                            {{ announcement.content|linebreaks }}
+                        </div>
+
+                        <!-- Badges -->
+                        <div class="d-flex flex-wrap gap-3 mb-4">
+                            <span class="badge badge-type">
+                                <i class="bi bi-tag me-1"></i>{{ announcement.get_announcement_type_display }}
+                            </span>
+                            {% if announcement.category %}
+                            <span class="badge badge-category">
+                                <i class="bi bi-folder me-1"></i>{{ announcement.category.name }}
+                            </span>
+                            {% endif %}
+                            {% if announcement.price %}
+                            <span class="badge badge-price">
+                                <i class="bi bi-currency-dollar me-1"></i>{{ announcement.price }} DT
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Author Actions -->
+                        {% if user == announcement.author %}
+                        <hr class="section-divider">
+                        <div class="d-flex gap-3 flex-wrap">
+                            <a href="{% url 'update-announcement' announcement.pk %}" class="btn action-btn">
+                                <i class="bi bi-pencil-square me-2"></i>Edit Announcement
+                            </a>
+                            <a href="{% url 'delete-announcement' announcement.pk %}" class="btn delete-btn">
+                                <i class="bi bi-trash me-2"></i>Delete Announcement
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Message Form (for non-authors) -->
+                {% if user.is_authenticated and user != announcement.author %}
+                <div class="card message-card mt-4">
+                    <div class="card-header message-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-envelope me-2"></i>Contact {{ announcement.author.username }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="contact-form">
+                            <form method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="announcement_id" value="{{ announcement.id }}">
+                                {{ form|crispy }}
+                                <div class="d-grid mt-4">
+                                    <button type="submit" class="btn view-profile-btn text-white">
+                                        <i class="bi bi-send me-2"></i>Send Message
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Author Sidebar -->
+            <div class="col-lg-4">
+                <div class="card author-card">
+                    <div class="card-header author-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-person-circle me-2"></i>About the Author
+                        </h5>
+                    </div>
+                    <div class="card-body text-center p-4">
+                        <div class="author-info">
+                            <img src="{{ announcement.author.profile_picture.url }}" 
+                                 class="profile-picture-lg mb-3" 
+                                 alt="{{ announcement.author.username }}">
+                            <h4 class="mb-2">{{ announcement.author.get_full_name|default:announcement.author.username }}</h4>
+                            
+                            {% if announcement.author.student_id %}
+                            <div class="text-muted mb-3">
+                                <i class="bi bi-person-badge me-1"></i>
+                                <span class="fw-medium">{{ announcement.author.student_id }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if announcement.author.bio %}
+                            <div class="text-muted mt-3 p-3 rounded" style="background: var(--light-gradient);">
+                                <i class="bi bi-quote"></i>
+                                <em>{{ announcement.author.bio }}</em>
+                            </div>
+                            {% endif %}
+
+                            <div class="d-grid mt-4">
+                                <a href="{% url 'profile' announcement.author.username %}" 
+                                   class="btn view-profile-btn text-white">
+                                    <i class="bi bi-person-lines-fill me-2"></i>View Full Profile
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
